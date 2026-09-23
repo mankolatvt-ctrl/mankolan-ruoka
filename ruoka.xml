@@ -1,11 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0">
   <channel>
-    <title>Testi</title>
-    <description>RSS testi</description>
+    <title>BrightSign RSS Test</title>
+    <link>https://mankolatvt-ctrl.github.io/mankolan-ruoka/ruoka.xml</link>
+    <description>RSS testi Mankolan koululle</description>
+
     <item>
-      <title>Testi</title>
-      <description>HELLO BRIGHTSIGN</description>
+      <title>HELLO BRIGHTSIGN TITLE</title>
+      <description>HELLO BRIGHTSIGN DESCRIPTION</description>
     </item>
+
   </channel>
 </rss>

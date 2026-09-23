@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0">
   <channel>
-    <title>BrightSign RSS Test</title>
-    <link>https://mankolatvt-ctrl.github.io/mankolan-ruoka/ruoka.xml</link>
-    <description>RSS testi Mankolan koululle</description>
+    <title>Mankolan koulu - päivän ruoka</title>
+    <link>https://kouluruoka.fi/menu/jyvaskyla_mankolankoulu/</link>
+    <description>Mankolan koulun päivän normaali lounas</description>
 
     <item>
-      <title>HELLO BRIGHTSIGN TITLE</title>
-      <description>HELLO BRIGHTSIGN DESCRIPTION</description>
+      <title>Keskiviikko 23.9.</title>
+      <description>Nakkikeitto (L, M, G, MU) , Edam juustoviipale (L, G, MU) , Jääsalaatti (L, M, G, MU) , Leipäpöytä (L, M, MU)</description>
     </item>
 
   </channel>

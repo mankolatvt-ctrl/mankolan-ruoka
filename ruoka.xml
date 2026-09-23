@@ -2,11 +2,12 @@
 <rss version="2.0">
   <channel>
     <title>Mankolan koulu - päivän ruoka</title>
+    <link>https://kouluruoka.fi/menu/jyvaskyla_mankolankoulu/</link>
     <description>Mankolan koulun päivän normaali lounas</description>
 
     <item>
-      <title>Testi</title>
-      <description>Testiruoka</description>
+      <title>Keskiviikko 23.9.</title>
+      <description>&lt;div&gt;&lt;span&gt;Nakkikeitto &lt;span class="menu-module--dietIndicator--f3054"&gt;(L, M, G, MU)&lt;/span&gt;, Edam juustoviipale &lt;span class="menu-module--dietIndicator--f3054"&gt;(L, G, MU)&lt;/span&gt;, JÃ¤Ã¤salaatti &lt;span class="menu-module--dietIndicator--f3054"&gt;(L, M, G, MU)&lt;/span&gt;, LeipÃ¤pÃ¶ytÃ¤ &lt;span class="menu-module--dietIndicator--f3054"&gt;(L, M, MU)&lt;/span&gt;&lt;/span&gt;&lt;button class="menu-module--noPrint--6ec4c" type="button"&gt;&lt;img alt="" height="24" src="/images/info.png" width="24"/&gt;&lt;/button&gt;&lt;/div&gt;</description>
     </item>
 
   </channel>

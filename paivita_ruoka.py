@@ -1,5 +1,5 @@
 import requests
-from bs4 import BeautifulSoup
+from bs4 import BeautifulSoup, NavigableString
 from datetime import date
 from xml.sax.saxutils import escape
 import re
@@ -24,7 +24,10 @@ def clean_text(text):
     return text.strip()
 
 
-# Haetaan Kouluruoka.fi
+# ---------------------------------------
+# 1. Haetaan Kouluruoka.fi
+# ---------------------------------------
+
 headers = {
     "User-Agent": "Mozilla/5.0 Mankolan-koulun-ruokabotti"
 }
@@ -37,19 +40,34 @@ response = requests.get(
 
 response.raise_for_status()
 
-soup = BeautifulSoup(response.text, "html.parser")
+# Pakotetaan UTF-8
+response.encoding = "utf-8"
+
+soup = BeautifulSoup(
+    response.text,
+    "html.parser"
+)
 
 
-# Selvitetään tämän päivän viikonpäivä
+# ---------------------------------------
+# 2. Selvitetään tämän päivän päivä
+# ---------------------------------------
+
 today = date.today()
 weekday = WEEKDAYS[today.weekday()]
 
 
-# Etsitään tämän päivän h2
+# ---------------------------------------
+# 3. Etsitään tämän päivän h2
+# ---------------------------------------
+
 day_heading = None
 
 for h2 in soup.find_all("h2"):
-    text = clean_text(h2.get_text(" ", strip=True)).lower()
+
+    text = clean_text(
+        h2.get_text(" ", strip=True)
+    ).lower()
 
     if text.startswith(weekday + " "):
         day_heading = h2
@@ -62,14 +80,15 @@ if day_heading is None:
     )
 
 
-# Etsitään tämän päivän ensimmäinen "Lounas"
-# Tämä on tärkeää:
-# emme ota Kasvislounasta.
+# ---------------------------------------
+# 4. Etsitään päivän normaali Lounas
+# ---------------------------------------
+
 lunch_heading = None
 
 for element in day_heading.find_all_next(["h2", "h3"]):
 
-    # Jos seuraava päivä alkaa, lopetetaan
+    # Seuraava h2 tarkoittaa seuraavaa päivää
     if element.name == "h2":
         break
 
@@ -77,6 +96,8 @@ for element in day_heading.find_all_next(["h2", "h3"]):
         element.get_text(" ", strip=True)
     ).lower()
 
+    # Otetaan ensimmäinen Lounas.
+    # Näin Kasvislounasta ei oteta.
     if text.startswith("lounas"):
         lunch_heading = element
         break
@@ -88,24 +109,37 @@ if lunch_heading is None:
     )
 
 
-# Kouluruoka.fi:n HTML-rakenteessa
-# varsinainen ruokalista on heti Lounas-otsikon jälkeen
-# tekstinä ja sen jälkeen tulee Ravintotiedot-linkki.
+# ---------------------------------------
+# 5. Haetaan VAIN ruoan tekstisisältö
+# ---------------------------------------
 
 menu = None
 
 for sibling in lunch_heading.next_siblings:
 
     # Jos vastaan tulee uusi otsikko,
-    # emme halua mennä seuraavaan osioon.
+    # lopetetaan.
     if getattr(sibling, "name", None) in ["h2", "h3"]:
         break
 
-    # Ravintotiedot-linkkiä ei oteta mukaan.
-    if getattr(sibling, "name", None) == "a":
+    # Ravintotiedot-painiketta ei oteta.
+    if getattr(sibling, "name", None) == "button":
         break
 
-    text = clean_text(str(sibling))
+    # Jos kyseessä on HTML-elementti,
+    # otetaan siitä vain näkyvä teksti.
+    if hasattr(sibling, "get_text"):
+
+        text = sibling.get_text(
+            " ",
+            strip=True
+        )
+
+    else:
+
+        text = str(sibling)
+
+    text = clean_text(text)
 
     if text:
         menu = text
@@ -118,21 +152,35 @@ if not menu:
     )
 
 
-# Varmistus, ettei Ravintotiedot päädy mukaan
-menu = menu.replace("Ravintotiedot", "")
-menu = menu.replace("[Ravintotiedot]", "")
+# ---------------------------------------
+# 6. Poistetaan mahdollinen Ravintotiedot
+# ---------------------------------------
+
+menu = menu.replace(
+    "Ravintotiedot",
+    ""
+)
+
 menu = clean_text(menu)
 
 
 if not menu:
-    raise Exception("Ruokalista jäi tyhjäksi.")
+    raise Exception(
+        "Ruokalista jäi tyhjäksi."
+    )
 
 
-# XML:ää varten erikoismerkit turvallisesti
+# ---------------------------------------
+# 7. Muutetaan teksti XML-turvalliseksi
+# ---------------------------------------
+
 menu_xml = escape(menu)
 
 
-# Luodaan RSS/XML
+# ---------------------------------------
+# 8. Luodaan RSS XML
+# ---------------------------------------
+
 xml = f"""<?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0">
   <channel>
@@ -150,12 +198,32 @@ xml = f"""<?xml version="1.0" encoding="UTF-8"?>
 """
 
 
-# Tallennetaan XML
-with open("ruoka.xml", "w", encoding="utf-8") as file:
+# ---------------------------------------
+# 9. Tallennetaan ruoka.xml
+# ---------------------------------------
+
+with open(
+    "ruoka.xml",
+    "w",
+    encoding="utf-8"
+) as file:
+
     file.write(xml)
 
 
+# ---------------------------------------
+# 10. Tulostetaan mitä haettiin
+# ---------------------------------------
+
+print()
+print("================================")
+print("MANKOLAN KOULUN RUOKA")
+print("================================")
 print("Päivämäärä:", today)
 print("Päivä:", weekday)
-print("Ruoka:", menu)
-print("XML kirjoitettu tiedostoon ruoka.xml")
+print()
+print("Ruoka:")
+print(menu)
+print()
+print("ruoka.xml päivitetty.")
+print("================================")

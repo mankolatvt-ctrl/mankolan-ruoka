@@ -1,14 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0">
   <channel>
-    <title>Mankolan koulu - päivän ruoka</title>
-    <link>https://kouluruoka.fi/menu/jyvaskyla_mankolankoulu/</link>
-    <description>Mankolan koulun päivän normaali lounas</description>
-
+    <title>Testi</title>
+    <description>RSS testi</description>
     <item>
-      <title>Keskiviikko 23.9.</title>
-      <description>Nakkikeitto (L, M, G, MU) , Edam juustoviipale (L, G, MU) , Jääsalaatti (L, M, G, MU) , Leipäpöytä (L, M, MU)</description>
+      <title>Testi</title>
+      <description>HELLO BRIGHTSIGN</description>
     </item>
-
   </channel>
 </rss>

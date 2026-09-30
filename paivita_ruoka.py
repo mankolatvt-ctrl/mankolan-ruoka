@@ -17,6 +17,8 @@ WEEKDAYS = [
     "sunnuntai"
 ]
 
+EI_RUOKAA_TEKSTI = "Ei ruokaa tänään"
+
 
 def clean_text(text):
     text = text.replace("\xa0", " ")
@@ -59,6 +61,9 @@ weekday = WEEKDAYS[today.weekday()]
 
 # ---------------------------------------
 # 3. Etsitään tämän päivän h2
+#    (viikonloppuna sivulla ei yleensä ole
+#    lainkaan otsikkoa lauantaille/sunnuntaille,
+#    jolloin näytetään "Ei ruokaa tänään")
 # ---------------------------------------
 
 day_heading = None
@@ -74,82 +79,80 @@ for h2 in soup.find_all("h2"):
         break
 
 
-if day_heading is None:
-    raise Exception(
-        f"Tämän päivän otsikkoa ei löytynyt: {weekday}"
-    )
-
-
-# ---------------------------------------
-# 4. Etsitään päivän normaali Lounas
-# ---------------------------------------
-
-lunch_heading = None
-
-for element in day_heading.find_all_next(["h2", "h3"]):
-
-    # Seuraava h2 tarkoittaa seuraavaa päivää
-    if element.name == "h2":
-        break
-
-    text = clean_text(
-        element.get_text(" ", strip=True)
-    ).lower()
-
-    # Otetaan ensimmäinen Lounas.
-    # Näin Kasvislounasta ei oteta.
-    if text.startswith("lounas"):
-        lunch_heading = element
-        break
-
-
-if lunch_heading is None:
-    raise Exception(
-        f"Lounasta ei löytynyt päivälle: {weekday}"
-    )
-
-
-# ---------------------------------------
-# 5. Haetaan VAIN ruoan tekstisisältö
-# ---------------------------------------
-
 menu = None
 
-for sibling in lunch_heading.next_siblings:
+if day_heading is None:
 
-    # Jos vastaan tulee uusi otsikko,
-    # lopetetaan.
-    if getattr(sibling, "name", None) in ["h2", "h3"]:
-        break
+    menu = EI_RUOKAA_TEKSTI
 
-    # Ravintotiedot-painiketta ei oteta.
-    if getattr(sibling, "name", None) == "button":
-        break
+else:
 
-    # Jos kyseessä on HTML-elementti,
-    # otetaan siitä vain näkyvä teksti.
-    if hasattr(sibling, "get_text"):
+    # ---------------------------------------
+    # 4. Etsitään päivän normaali Lounas
+    # ---------------------------------------
 
-        text = sibling.get_text(
-            " ",
-            strip=True
-        )
+    lunch_heading = None
+
+    for element in day_heading.find_all_next(["h2", "h3"]):
+
+        # Seuraava h2 tarkoittaa seuraavaa päivää
+        if element.name == "h2":
+            break
+
+        text = clean_text(
+            element.get_text(" ", strip=True)
+        ).lower()
+
+        # Otetaan ensimmäinen Lounas.
+        # Näin Kasvislounasta ei oteta.
+        if text.startswith("lounas"):
+            lunch_heading = element
+            break
+
+    if lunch_heading is None:
+
+        # Päivä löytyi, mutta lounasta ei ole
+        # (esim. loma-aika tai muu poikkeus)
+        menu = EI_RUOKAA_TEKSTI
 
     else:
 
-        text = str(sibling)
+        # ---------------------------------------
+        # 5. Haetaan VAIN ruoan tekstisisältö
+        # ---------------------------------------
 
-    text = clean_text(text)
+        for sibling in lunch_heading.next_siblings:
 
-    if text:
-        menu = text
-        break
+            # Jos vastaan tulee uusi otsikko,
+            # lopetetaan.
+            if getattr(sibling, "name", None) in ["h2", "h3"]:
+                break
 
+            # Ravintotiedot-painiketta ei oteta.
+            if getattr(sibling, "name", None) == "button":
+                break
 
-if not menu:
-    raise Exception(
-        f"Ruokaa ei löytynyt päivälle: {weekday}"
-    )
+            # Jos kyseessä on HTML-elementti,
+            # otetaan siitä vain näkyvä teksti.
+            if hasattr(sibling, "get_text"):
+
+                text = sibling.get_text(
+                    " ",
+                    strip=True
+                )
+
+            else:
+
+                text = str(sibling)
+
+            text = clean_text(text)
+
+            if text:
+                menu = text
+                break
+
+        if not menu:
+            menu = EI_RUOKAA_TEKSTI
 
 
 # ---------------------------------------
@@ -163,11 +166,8 @@ menu = menu.replace(
 
 menu = clean_text(menu)
 
-
 if not menu:
-    raise Exception(
-        "Ruokalista jäi tyhjäksi."
-    )
+    menu = EI_RUOKAA_TEKSTI
 
 
 # ---------------------------------------
